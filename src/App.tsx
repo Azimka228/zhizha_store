@@ -37,7 +37,6 @@ function App() {
 						<Route path="/items" element={<MyItems uid={user.uid}/>}/>
 					</Routes>
 					<button onClick={LogOut}>LogOut</button>
-					<div>{user.uid}</div>
 				</>) :
 				(<>
 					<LoginForm/>
