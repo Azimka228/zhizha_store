@@ -8,6 +8,7 @@ import LoginForm from "./Components/User/LoginForm/LoginForm";
 import SignUpForm from "./Components/User/SignUpForm/SignUpForm";
 import {getAuth, onAuthStateChanged, signOut} from "firebase/auth";
 import MyItems from "./Components/MyItems/MyItems";
+import AddItems from "./Components/AddItems/AddItems";
 
 function App() {
 	const [user, setUser] = useState<any>()
@@ -23,28 +24,27 @@ function App() {
 		await signOut(getAuth())
 	}
 
-	console.log("app", user)
 	return (
 		<div className="App">
 			{user ?
 				(<>
-					<div><Link to="/">HOME</Link></div>
-					<div><Link to="/history">HISTORY</Link></div>
-					<div><Link to="/items">ITEMS</Link></div>
+					<button onClick={LogOut}>LogOut</button>
+					<div><Link to="/">Главная</Link></div>
+					<div><Link to="/history">История</Link></div>
+					<div><Link to="/items">Жидкости</Link></div>
+					<div><Link to="/add-items">Добавить новую жидкость</Link></div>
 					<Routes>
 						<Route path="/" element={<MyBalance uid={user.uid}/>}/>
 						<Route path="/history" element={<MyHistory uid={user.uid}/>}/>
 						<Route path="/items" element={<MyItems uid={user.uid}/>}/>
+						<Route path="/add-items" element={<AddItems uid={user.uid}/>}/>
 					</Routes>
-					<button onClick={LogOut}>LogOut</button>
 				</>) :
 				(<>
 					<LoginForm/>
 					<SignUpForm></SignUpForm>
 				</>)
 			}
-
-
 		</div>
 	);
 }

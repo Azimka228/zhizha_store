@@ -7,52 +7,32 @@ type MyItemsProps = {
 }
 
 const MyItems: React.FC<MyItemsProps> = ({uid}) => {
-	let test = useCallback(() => {
+	const [items, setItems] = useState<any>({})
+	const test = useCallback(() => {
 		onSnapshot(doc(db, "users", uid), (doc) => {
 			let obj = doc.data()
-			// setBalance(obj?.Balance)
 			setItems(obj?.Items)
-			setNameItems(Object.getOwnPropertyNames(obj?.Items))
 		});
-	}, [])
-	const [items, setItems] = useState<any>({})
-	const [nameItems, setNameItems] = useState<string[]>([])
+	}, [setItems])
 	useEffect(() => {
 		test()
 	}, [test])
 	return (
 		<div>
-			{items && Object.keys(items)?.map(key => {
-				// let title
-				// let count
-				// (items[key].map((item: string) => {
-				// 	let splitedItems =  item.split(',')
-				// 	title = splitedItems[0]
-				// 	count = splitedItems[1]
-				// }))
-				return (
+			{items ? Object.keys(items)?.map(key => (
 					<div key={key}>
 						(Вкусы) {key}
 						{items[key].map((el: {}) => {
-							// @ts-ignore
-
-							let [count]:DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, any> = Object.values(el)
+							let [count]: any = Object.values(el)
 							let title = Object.keys(el)
 							console.log(count)
 
 							return(
-								<>
 									<div>{title} - ({count} штук)</div>
-
-								</>
 							)
-
 						})}
 					</div>
-				)
-			})}
-
-			{Object.keys(items).length == 0 && <div>loading...</div>}
+				)) : <div>loading...</div>}
 		</div>
 	);
 };

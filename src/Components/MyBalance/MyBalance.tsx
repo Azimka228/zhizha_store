@@ -116,7 +116,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 				<div>Вкус
 					<select name="tasteItem" onChange={onSelectTasteItem}>
 						<option selected disabled>Жидкости</option>
-						{userInfo.Items[titleItem] && userInfo.Items[titleItem].map((el: {}) => {
+						{userInfo.Items[titleItem]?.map((el: {}) => {
 							let keys = Object.keys(el)
 							return (
 								<option value={keys}>{keys}</option>
