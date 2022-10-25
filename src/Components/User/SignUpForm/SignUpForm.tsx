@@ -2,6 +2,8 @@ import React from "react";
 import {createUserWithEmailAndPassword, getAuth} from "firebase/auth";
 import {doc, setDoc} from "firebase/firestore";
 import {db} from "../../../Firebase";
+import {useNavigate} from "react-router-dom";
+import {Button, Paper} from "@mui/material";
 
 type SignUpFormData = {
 	email: HTMLFormElement
@@ -9,6 +11,7 @@ type SignUpFormData = {
 }
 
 const SignUpForm = () => {
+	let navigate = useNavigate();
 	const SignUpData: React.FormEventHandler<HTMLFormElement & SignUpFormData> = (e) => {
 		e.preventDefault()
 		const form = e.currentTarget
@@ -17,7 +20,6 @@ const SignUpForm = () => {
 		const auth = getAuth();
 		createUserWithEmailAndPassword(auth, email.value, password.value)
 			.then((userCredential) => {
-				// Creating options for the user
 				setDoc(doc(db, "users", userCredential.user.uid), {
 					History: [],
 					Balance: 0,
@@ -34,28 +36,27 @@ const SignUpForm = () => {
 						],
 					}
 				});
-
-				// ...
+				return navigate("/");
 			})
 			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				// ..
+				alert("Ошибка")
 			});
 	}
 	return (
-		<form onSubmit={SignUpData}>
-			<label>
-				<span>Email</span>
-				<input name="email" type="email"/>
-			</label>
-			<label>
-				<span>Password</span>
-				<input name="password" type="password"/>
-			</label>
-			<button type="submit">SIGN UP</button>
+		<Paper elevation={3} >
+	<form onSubmit={SignUpData}>
+		<label>
+			<span>Почта: </span>
+			<input name="email" type="email"/>
+		</label>
+		<label>
+			<span>Пароль: </span>
+			<input name="password" type="password"/>
+		</label>
+		<Button type="submit">Регистрация</Button>
+	</form>
+</Paper>
 
-		</form>
 	);
 };
 
