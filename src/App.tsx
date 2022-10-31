@@ -23,7 +23,7 @@ function App() {
 		// @ts-ignore
 		const unsubscribe = onAuthStateChanged(getAuth(), setUser, setError)
 		return () => unsubscribe()
-	}, [])
+	}, )
 
 	const LogOut = async () => {
 		await signOut(getAuth())
@@ -56,7 +56,7 @@ function App() {
 						variant="h5"
 						noWrap
 						component="a"
-						href=""
+						href="/"
 						sx={{
 							mr: "40px",
 							fontFamily: "monospace",

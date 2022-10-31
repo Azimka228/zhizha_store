@@ -5,6 +5,10 @@ a{
   height: 100%;
 }
 
+form a {
+  color:black
+}
+
 .App {
   text-align: center;
 }

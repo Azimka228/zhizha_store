@@ -1,7 +1,7 @@
-import React, {ChangeEvent, ReactNode, useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
-import {Button, MenuItem, Select, SelectChangeEvent} from "@mui/material";
+import {Button} from "@mui/material";
 
 type BalanceType = {
 	History: Array<string>
@@ -66,14 +66,14 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 		});
 		getBalanceUser()
 	}
-	const onSelectTasteItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
+	const onSelectTasteItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let value = event.target.value;
 		setTasteItem(value)
 	};
 	const onChangeItemPrice = (e: ChangeEvent<HTMLInputElement>) => {
 		setPriceItem(+e.currentTarget.value)
 	}
-	const onSelectTitleItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
+	const onSelectTitleItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let value = event.target.value;
 		setTitleItem(value)
 	};
@@ -81,31 +81,31 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 		<>
 			<div>Баланс - {userInfo.Balance}</div>
 			<div>
-				<div>Название
-					<Select
-						autoWidth
-						name="titleItem"
+					<select
+						id="title"
 						onChange={onSelectTitleItem}>
+						<option selected disabled>Жидкости</option>
 						{Object.keys(userInfo.Items).map(el => {
 							return (
-								<MenuItem  value={el}>{el}</MenuItem >
+								<option value={el}>{el}</option>
 							)
 						})}
-					</Select>
+					</select>
+				<div>
+
+						<select
+							onChange={onSelectTasteItem}>
+       <option selected disabled>Жидкости</option>
+							{userInfo.Items[titleItem]?.map((el: {}) => {
+								let keys = Object.keys(el)
+								return (
+									<option value={keys}>{keys}</option>
+								)
+							})}
+						</select>
+
 				</div>
-				<div>Вкус
-					<Select
-						autoWidth
-						labelId="tasteItem"
-						onChange={onSelectTasteItem}>
-						{userInfo.Items[titleItem]?.map((el: {}) => {
-							let keys = Object.keys(el)
-							return (
-								<MenuItem  value={keys}>{keys}</MenuItem >
-							)
-						})}
-					</Select>
-				</div>
+
 				<div>
 					Количество -
 					<input value={1} type="number" disabled/>
