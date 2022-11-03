@@ -12,13 +12,14 @@ import AddItems from "./Components/AddItems/AddItems";
 import {AppBar, Box, Drawer, IconButton, MenuItem, Paper, Toolbar} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
+import Profile from "./Components/User/Profile/Profile";
 
 function App() {
 	let navigate = useNavigate();
 
 	const [user, setUser] = useState<any>()
 	const [error, setError] = useState()
-
+	console.log(user)
 	useEffect(() => {
 		// @ts-ignore
 		const unsubscribe = onAuthStateChanged(getAuth(), setUser, setError)
@@ -85,7 +86,8 @@ function App() {
 											textDecoration: "none"
 										}}
 					>
-						<Paper sx={{borderRadius: 3, backgroundColor: "#7B68EE",}}>
+						<Paper sx={{borderRadius: 3, backgroundColor: "#7B68EE"}}>
+							<MenuItem onClick={handleClose}><Link to="/profile">Профиль</Link></MenuItem>
 							<MenuItem onClick={handleClose}><Link to="/">Главная</Link></MenuItem>
 							<MenuItem onClick={handleClose}><Link to="/history">История</Link></MenuItem>
 							<MenuItem onClick={handleClose}><Link to="/items">Жидкости</Link></MenuItem>
@@ -106,9 +108,12 @@ function App() {
 							textDecoration: "none"
 						}}
 					>
-						<MenuItem onClick={handleClose}><Link to="/">Главная</Link></MenuItem>
-						<MenuItem onClick={handleClose}><Link to="/register">Регистрация</Link></MenuItem>
-						<MenuItem onClick={handleClose}><Link to="/login">Логин</Link></MenuItem>
+						<Paper  sx={{borderRadius: 3, backgroundColor: "#7B68EE"}}>
+							<MenuItem onClick={handleClose}><Link to="/">Главная</Link></MenuItem>
+							<MenuItem onClick={handleClose}><Link to="/register">Регистрация</Link></MenuItem>
+							<MenuItem onClick={handleClose}><Link to="/login">Логин</Link></MenuItem>
+						</Paper>
+
 					</Box>
 
 				}
@@ -119,6 +124,7 @@ function App() {
 			{user ?
 				(<>
 					<Routes>
+						<Route path="/profile" element={<Profile user={user}/>}/>
 						<Route path="/" element={<MyBalance uid={user.uid}/>}/>
 						<Route path="/history" element={<MyHistory uid={user.uid}/>}/>
 						<Route path="/items" element={<MyItems uid={user.uid}/>}/>

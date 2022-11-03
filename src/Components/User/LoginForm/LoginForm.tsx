@@ -66,7 +66,7 @@ const LoginForm = () => {
 							id="email"
 							label="Почта"
 							name="email"
-							autoComplete="email"
+							autoComplete="off"
 							autoFocus
 						/>
 						<TextField
@@ -77,7 +77,7 @@ const LoginForm = () => {
 							label="Пароль"
 							type="password"
 							id="password"
-							autoComplete="current-password"
+							autoComplete="off"
 						/>
 						<Button
 							type="submit"

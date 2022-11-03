@@ -11,6 +11,8 @@ form a {
 
 .App {
   text-align: center;
+  background-color: #D3D3D3;
+  height: 100%;
 }
 
 .App-logo {

@@ -33,6 +33,7 @@ const SignUpForm = () => {
 				setDoc(doc(db, "users", userCredential.user.uid), {
 					History: [],
 					Balance: 0,
+					Profit:0,
 					Items: {
 						"rell": [
 							{"lemon": 1},
@@ -73,7 +74,7 @@ const SignUpForm = () => {
 					<Typography component="h1" variant="h5">
 						Регистрация
 					</Typography>
-					<Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+					<Box component="form"  noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
 						<Grid container spacing={2}>
 							<Grid item xs={12}>
 								<TextField
@@ -82,7 +83,7 @@ const SignUpForm = () => {
 									id="email"
 									label="Почта"
 									name="email"
-									autoComplete="email"
+									autoComplete="off"
 								/>
 							</Grid>
 							<Grid item xs={12}>
@@ -93,7 +94,7 @@ const SignUpForm = () => {
 									label="Пароль"
 									type="password"
 									id="password"
-									autoComplete="new-password"
+									autoComplete="off"
 								/>
 							</Grid>
 						</Grid>

@@ -6,6 +6,7 @@ import {Button} from "@mui/material";
 type BalanceType = {
 	History: Array<string>
 	Balance: number
+	Profit: number
 	Items: { [key: string]: any }
 }
 
@@ -21,6 +22,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 				let newObj = {
 					History: [...obj.History],
 					Balance: obj.Balance,
+					Profit: obj.Profit,
 					Items: {...obj.Items},
 				}
 				setUserInfo(newObj)
@@ -32,6 +34,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 	const [userInfo, setUserInfo] = useState<BalanceType>({
 		History: [],
 		Balance: 0,
+		Profit: 0,
 		Items: {},
 	})
 	const [tasteItem, setTasteItem] = useState<string>("")
@@ -46,6 +49,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 		const docRef = doc(db, "users", uid);
 		updateDoc(docRef, {
 			Balance: userInfo.Balance + priceItem,
+			Profit: userInfo.Profit + (priceItem - 12.5),
 			History: userInfo.History,
 			Items: {
 				...userInfo.Items,
@@ -79,7 +83,6 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 	};
 	return (
 		<>
-			<div>Баланс - {userInfo.Balance}</div>
 			<div>
 					<select
 						id="title"
@@ -114,7 +117,8 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 					<input type="number" value={priceItem} onChange={onChangeItemPrice} min={12.5} max={30} step="0.5"/>
 				</div>
 				<Button
-					variant="outlined"
+					variant="contained"
+					color="secondary"
 					onClick={HandleSubmit}
 					disabled={tasteItem === "" || titleItem === ""}
 				>Подтвердить</Button>
