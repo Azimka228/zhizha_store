@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {doc, onSnapshot, setDoc, updateDoc} from "firebase/firestore";
+import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
-import {Navigate, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Button} from "@mui/material";
 
 type AddItemProps = {
@@ -32,6 +32,7 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
 
 		const [newItemTitle, setItemTitle] = useState<string>("")
 		const [newItemTaste, setItemTaste] = useState<string>("")
+
 
 		useEffect(() => {
 			if (selectedItemTaste) {
@@ -85,7 +86,7 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
 					Items: {
 						...itemCollection,
 						[newItemTitle]: [
-							{[newItemTaste]: [tasteAmount]}
+							{[newItemTaste]: tasteAmount}
 						],
 					}
 				}).then(() => { window.location.reload()})
@@ -160,7 +161,11 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
      <div>Название вкуса жидкости - <input value={newItemTaste} onChange={onNewItemTasteChange} type="text"/></div>}
 				<div>Количество товара - <input value={tasteAmount} onChange={onInputValueChange}/></div>
 
-				<Button variant="contained" color="secondary" onClick={HandleSubmit}>Подтвердить</Button>
+				<Button
+					disabled={selectedItemTitle === "" || selectedItemTaste === ""}
+					variant="contained"
+					color="secondary"
+					onClick={HandleSubmit}>Подтвердить</Button>
 			</div>
 		);
 	}

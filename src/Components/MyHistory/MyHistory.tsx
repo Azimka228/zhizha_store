@@ -19,18 +19,29 @@ const MyHistory:React.FC<MyHistoryProps> = ({uid}) => {
 	useEffect(()=>{
 		test()
 	},[test])
-
+	let currentDay:any = Object.keys(history)
 	return (
 		<div>
+			<h1>История</h1>
+			{currentDay.map((day:any) => {
+				return(<div><p>{day}</p>
+						{history[day].map((cell:any) => {
+							return(
+								<div>{cell}</div>
+							)
+						})}
+						</div>
 
-			{history.map(el => {
-					const [time, money] = el.split(",")
-				return(<div>
-					<div>{time}</div>
-					<div>{money}</div>
-				</div>)
-
+				)
 			})}
+			{/*{history.map(el => {*/}
+			{/*		const [time, money] = el.split(",")*/}
+			{/*	return(<div>*/}
+			{/*		<div>{time}</div>*/}
+			{/*		<div>{money}</div>*/}
+			{/*	</div>)*/}
+
+			{/*})}*/}
 			{history.length === 0 && <div>loading...</div>}
 			{/*<button onClick={test}>History</button>*/}
 		</div>

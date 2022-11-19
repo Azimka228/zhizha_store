@@ -20,7 +20,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 			let obj = doc.data()
 			if (obj) {
 				let newObj = {
-					History: [...obj.History],
+					History: {...obj.History},
 					Balance: obj.Balance,
 					Profit: obj.Profit,
 					Items: {...obj.Items},
@@ -47,27 +47,79 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 
 	const HandleSubmit = async () => {
 		const docRef = doc(db, "users", uid);
-		updateDoc(docRef, {
-			Balance: userInfo.Balance + priceItem,
-			Profit: userInfo.Profit + (priceItem - 12.5),
-			History: userInfo.History,
-			Items: {
-				...userInfo.Items,
-				[titleItem]: [
-					...userInfo.Items[titleItem]
-						.filter((el: any) => el[tasteItem] !== 1).map((el: any) => {
-							if (Object.keys(el)[0] === tasteItem && el[tasteItem] > 1) {
-								console.log(el[tasteItem])
-								return {
-									[tasteItem]: el[tasteItem] - 1
-								}
-							} else {
-								return {...el}
+		let newObj = {
+			...userInfo.Items,
+			[titleItem]: [
+				...userInfo.Items[titleItem]
+					.filter((el: any) => el[tasteItem] !== 1).map((el: any) => {
+						if (Object.keys(el)[0] === tasteItem && el[tasteItem] > 1) {
+							console.log(el[tasteItem])
+							return {
+								[tasteItem]: el[tasteItem] - 1
 							}
-						})
-				]
-			},
-		});
+						} else {
+							return {...el}
+						}
+					})
+			]
+		}
+		if (newObj[titleItem].length === 0) {
+			delete newObj[titleItem]
+		}
+
+		let currentData = new Date
+
+		function formatData(date: number | Date | undefined) {
+			return ["year", "month", "day"].map(e => new Intl.DateTimeFormat("en", {
+				[e]: "numeric",
+			}).format(date).padStart(2, "0")).join(" ");
+		}
+
+		let formattedData: any = formatData(currentData)
+		if (userInfo.History[formattedData] !== undefined) {
+			updateDoc(docRef, {
+				Balance: userInfo.Balance + priceItem,
+				Profit: userInfo.Profit + (priceItem - 12.5),
+				History: {
+					...userInfo.History,
+					[formattedData]: [
+						...userInfo.History[formattedData],
+						`Продажа - ${tasteItem} ${titleItem}(1 штука)  ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
+					]
+				},
+				Items: {
+					...newObj
+				},
+			}).then(() => {
+				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
+				if (count === 1) {
+					setTasteItem("")
+					alert("All were selled")
+					window.location.reload()
+				}
+			})
+		} else {
+			updateDoc(docRef, {
+				Balance: userInfo.Balance + priceItem,
+				Profit: userInfo.Profit + (priceItem - 12.5),
+				History: {
+					...userInfo.History,
+					[formattedData]: [
+						`Продажа - ${tasteItem} ${titleItem}(1 штука)  ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
+					]
+				},
+				Items: {
+					...newObj
+				},
+			}).then(() => {
+				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
+				if (count === 1) {
+					setTasteItem("")
+					alert("All were selled")
+					window.location.reload()
+				}
+			})
+		}
 		getBalanceUser()
 	}
 	const onSelectTasteItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -84,28 +136,28 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 	return (
 		<>
 			<div>
+				<select
+					id="title"
+					onChange={onSelectTitleItem}>
+					<option selected disabled>Жидкости</option>
+					{Object.keys(userInfo.Items).map(el => {
+						return (
+							<option value={el}>{el}</option>
+						)
+					})}
+				</select>
+				<div>
+
 					<select
-						id="title"
-						onChange={onSelectTitleItem}>
+						onChange={onSelectTasteItem}>
 						<option selected disabled>Жидкости</option>
-						{Object.keys(userInfo.Items).map(el => {
+						{userInfo.Items[titleItem]?.map((el: {}) => {
+							let keys = Object.keys(el)
 							return (
-								<option value={el}>{el}</option>
+								<option value={keys}>{keys}</option>
 							)
 						})}
 					</select>
-				<div>
-
-						<select
-							onChange={onSelectTasteItem}>
-       <option selected disabled>Жидкости</option>
-							{userInfo.Items[titleItem]?.map((el: {}) => {
-								let keys = Object.keys(el)
-								return (
-									<option value={keys}>{keys}</option>
-								)
-							})}
-						</select>
 
 				</div>
 
