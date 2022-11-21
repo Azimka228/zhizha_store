@@ -15,7 +15,7 @@ import {
 import AccordionItem from "./AccordionItem";
 import CloseIcon from "@mui/icons-material/Close";
 
-const BootstrapDialog = styled(Dialog)(({theme}) => ({
+export const BootstrapDialog = styled(Dialog)(({theme}) => ({
 	"& .MuiDialogContent-root": {
 		padding: theme.spacing(6),
 	},
@@ -30,7 +30,7 @@ export interface DialogTitleProps {
 	onClose: () => void;
 }
 
-function BootstrapDialogTitle(props: DialogTitleProps) {
+export function BootstrapDialogTitle(props: DialogTitleProps) {
 	const {children, onClose, ...other} = props;
 
 	return (
@@ -61,7 +61,6 @@ type MyItemsProps = {
 const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 	const [items, setItems] = useState<any>({})
 	const [newTitle, setNewTitle] = useState<string>("")
-	const [newTaste, setNewTaste] = useState<string>("")
 
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
@@ -123,10 +122,56 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 			},
 		})
 	}
+	const onChangeTasteItem = (index: any, currValue: any, title: any) => {
+		let Text = currValue["text"]
+		let Count = currValue["count"]
+		let newCurrValue = {[Text]: Count}
 
-	const onAddNewTasteItem = (title: any) => {
+		const docRef = doc(db, "users", uid);
+		let obj = {
+			...items
+		}
+		obj[title][index] = newCurrValue
 
-		console.log(title)
+		console.log(obj)
+		updateDoc(docRef, {
+			Items: {
+				...obj,
+			},
+		})
+
+	}
+
+	const onAddNewTasteItem = (title: any, taste: any) => {
+		const docRef = doc(db, "users", uid);
+		let obj = {
+			...items
+		}
+		let Count = taste["count"]
+		let Taste = taste["taste"]
+
+		console.log(obj[title].length)
+		if (obj[title].length === 0) {
+			updateDoc(docRef, {
+				Items: {
+					...obj,
+					[title]: [
+						{[Taste]: Count}
+					]
+				},
+			})
+		} else {
+			updateDoc(docRef, {
+				Items: {
+					...obj,
+					[title]: [
+						...obj[title].map((el: any) => ({...el})),
+						{[Taste]: Count}
+					]
+				},
+			})
+		}
+		handleClose()
 
 	}
 	const onAddNewTitleItem = () => {
@@ -134,6 +179,7 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 		let obj = {
 			...items
 		}
+		console.log(obj)
 		updateDoc(docRef, {
 			Items: {
 				...obj,
@@ -158,7 +204,7 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 				<DialogContent dividers>
 					<TextField
 						id="outlined-basic"
-						label="Текст"
+						label="Название"
 						onChange={(e) => {
 							setNewTitle(e.currentTarget.value)
 						}}
@@ -171,7 +217,13 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 					</Button>
 				</DialogActions>
 			</BootstrapDialog>
-			<Box>
+			<Box sx={
+				{
+					display: "flex",
+					justifyContent: "center",
+					flexWrap:"wrap"
+				}
+			}>
 				{items ? Object.keys(items)?.map(key => (
 					<AccordionItem
 						title={key}
@@ -179,7 +231,7 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 						onDelete={onDelete}
 						onChangeText={onChangeText}
 						onAddNewTasteItem={onAddNewTasteItem}
-
+						onChangeTasteItem={onChangeTasteItem}
 					/>
 				)) : <div>loading...</div>}
 			</Box>

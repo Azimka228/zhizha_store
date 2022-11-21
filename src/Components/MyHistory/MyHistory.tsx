@@ -34,16 +34,7 @@ const MyHistory:React.FC<MyHistoryProps> = ({uid}) => {
 
 				)
 			})}
-			{/*{history.map(el => {*/}
-			{/*		const [time, money] = el.split(",")*/}
-			{/*	return(<div>*/}
-			{/*		<div>{time}</div>*/}
-			{/*		<div>{money}</div>*/}
-			{/*	</div>)*/}
-
-			{/*})}*/}
 			{history.length === 0 && <div>loading...</div>}
-			{/*<button onClick={test}>History</button>*/}
 		</div>
 	);
 };
