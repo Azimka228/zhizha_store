@@ -1,12 +1,16 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {doc, onSnapshot} from "firebase/firestore";
+import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
+import {useNavigate} from "react-router-dom";
+import {Button} from "@mui/material";
 
 type AddItemProps = {
 	uid: string
 }
 
 const AddItems: React.FC<AddItemProps> = ({uid}) => {
+
+		const navigate = useNavigate();
 		let test = useCallback(() => {
 			onSnapshot(doc(db, "users", uid), (doc) => {
 				let obj = doc.data()
@@ -21,11 +25,14 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
 			test()
 		}, [test])
 
+
+
 		const [selectedItemTitle, setSelectedItemTitle] = useState<string>("")
 		const [selectedItemTaste, setSelectedItemTaste] = useState<string>("")
 
 		const [newItemTitle, setItemTitle] = useState<string>("")
 		const [newItemTaste, setItemTaste] = useState<string>("")
+
 
 		useEffect(() => {
 			if (selectedItemTaste) {
@@ -55,8 +62,8 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
 		}
 
 		const onInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-			if(isNaN((+e.currentTarget.value))) {
-     return
+			if (isNaN((+e.currentTarget.value))) {
+				return
 			}
 			setTasteAmount((+e.currentTarget.value))
 
@@ -67,6 +74,60 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
 		}
 		const onNewItemTasteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			setItemTaste(e.currentTarget.value)
+		}
+
+		const HandleSubmit = () => {
+			console.log(itemCollection)
+			const docRef = doc(db, "users", uid);
+
+
+			if (selectedItemTitle === "new" && selectedItemTaste === "new") {
+				updateDoc(docRef, {
+					Items: {
+						...itemCollection,
+						[newItemTitle]: [
+							{[newItemTaste]: tasteAmount}
+						],
+					}
+				}).then(() => { window.location.reload()})
+			}
+			// TODO !!!!!!!
+			if (selectedItemTitle !== "new" && selectedItemTaste === "new") {
+				updateDoc(docRef, {
+					Items: {
+						...itemCollection,
+						[selectedItemTitle]: [
+							...itemCollection?.[selectedItemTitle]
+								?.map((el: any) => {
+									return {...el}
+								}),
+							{[newItemTaste]: tasteAmount}
+						],
+					}
+				}).then(() => { window.location.reload()})
+
+			}
+			if (selectedItemTitle !== "new" && selectedItemTaste !== "new") {
+				updateDoc(docRef, {
+					Items: {
+						...itemCollection,
+						[selectedItemTitle]: [
+							...itemCollection[selectedItemTitle]
+								.map((el: any) => {
+									if (Object.keys(el)[0] === selectedItemTaste) {
+										return {
+											[selectedItemTaste]: tasteAmount
+										}
+									} else {
+										return {...el}
+									}
+								})
+
+						]
+					}
+				}).then(() => { window.location.reload()})
+			}
+
 		}
 		return (
 			<div>
@@ -100,8 +161,11 @@ const AddItems: React.FC<AddItemProps> = ({uid}) => {
      <div>Название вкуса жидкости - <input value={newItemTaste} onChange={onNewItemTasteChange} type="text"/></div>}
 				<div>Количество товара - <input value={tasteAmount} onChange={onInputValueChange}/></div>
 
-				{/*Todo: Create submit function for BUTTON, add checking for errors*/}
-				<button>Подтвердить</button>
+				<Button
+					disabled={selectedItemTitle === "" || selectedItemTaste === ""}
+					variant="contained"
+					color="secondary"
+					onClick={HandleSubmit}>Подтвердить</Button>
 			</div>
 		);
 	}

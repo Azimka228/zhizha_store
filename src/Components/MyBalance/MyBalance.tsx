@@ -1,11 +1,12 @@
-import React, {ChangeEvent, ReactNode, useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
-import {Button, MenuItem, Select, SelectChangeEvent} from "@mui/material";
+import {Button} from "@mui/material";
 
 type BalanceType = {
 	History: Array<string>
 	Balance: number
+	Profit: number
 	Items: { [key: string]: any }
 }
 
@@ -19,8 +20,9 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 			let obj = doc.data()
 			if (obj) {
 				let newObj = {
-					History: [...obj.History],
+					History: {...obj.History},
 					Balance: obj.Balance,
+					Profit: obj.Profit,
 					Items: {...obj.Items},
 				}
 				setUserInfo(newObj)
@@ -32,6 +34,7 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 	const [userInfo, setUserInfo] = useState<BalanceType>({
 		History: [],
 		Balance: 0,
+		Profit: 0,
 		Items: {},
 	})
 	const [tasteItem, setTasteItem] = useState<string>("")
@@ -44,68 +47,120 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 
 	const HandleSubmit = async () => {
 		const docRef = doc(db, "users", uid);
-		updateDoc(docRef, {
-			Balance: userInfo.Balance + priceItem,
-			History: userInfo.History,
-			Items: {
-				...userInfo.Items,
-				[titleItem]: [
-					...userInfo.Items[titleItem]
-						.filter((el: any) => el[tasteItem] !== 1).map((el: any) => {
-							if (Object.keys(el)[0] === tasteItem && el[tasteItem] > 1) {
-								console.log(el[tasteItem])
-								return {
-									[tasteItem]: el[tasteItem] - 1
-								}
-							} else {
-								return {...el}
+		let newObj = {
+			...userInfo.Items,
+			[titleItem]: [
+				...userInfo.Items[titleItem]
+					.filter((el: any) => el[tasteItem] !== 1).map((el: any) => {
+						if (Object.keys(el)[0] === tasteItem && el[tasteItem] > 1) {
+							console.log(el[tasteItem])
+							return {
+								[tasteItem]: el[tasteItem] - 1
 							}
-						})
-				]
-			},
-		});
+						} else {
+							return {...el}
+						}
+					})
+			]
+		}
+		if (newObj[titleItem].length === 0) {
+			delete newObj[titleItem]
+		}
+
+		let currentData = new Date
+
+		function formatData(date: number | Date | undefined) {
+			return ["year", "month", "day"].map(e => new Intl.DateTimeFormat("en", {
+				[e]: "numeric",
+			}).format(date).padStart(2, "0")).join(" ");
+		}
+
+		let formattedData: any = formatData(currentData)
+		if (userInfo.History[formattedData] !== undefined) {
+			updateDoc(docRef, {
+				Balance: userInfo.Balance + priceItem,
+				Profit: userInfo.Profit + (priceItem - 12.5),
+				History: {
+					...userInfo.History,
+					[formattedData]: [
+						...userInfo.History[formattedData],
+						`Продажа - ${tasteItem} ${titleItem}(1 штука)  ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
+					]
+				},
+				Items: {
+					...newObj
+				},
+			}).then(() => {
+				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
+				if (count === 1) {
+					setTasteItem("")
+					alert("All were selled")
+					window.location.reload()
+				}
+			})
+		} else {
+			updateDoc(docRef, {
+				Balance: userInfo.Balance + priceItem,
+				Profit: userInfo.Profit + (priceItem - 12.5),
+				History: {
+					...userInfo.History,
+					[formattedData]: [
+						`Продажа - ${tasteItem} ${titleItem}(1 штука)  ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
+					]
+				},
+				Items: {
+					...newObj
+				},
+			}).then(() => {
+				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
+				if (count === 1) {
+					setTasteItem("")
+					alert("All were selled")
+					window.location.reload()
+				}
+			})
+		}
 		getBalanceUser()
 	}
-	const onSelectTasteItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
+	const onSelectTasteItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let value = event.target.value;
 		setTasteItem(value)
 	};
 	const onChangeItemPrice = (e: ChangeEvent<HTMLInputElement>) => {
 		setPriceItem(+e.currentTarget.value)
 	}
-	const onSelectTitleItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
+	const onSelectTitleItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let value = event.target.value;
 		setTitleItem(value)
 	};
 	return (
 		<>
-			<div>Баланс - {userInfo.Balance}</div>
 			<div>
-				<div>Название
-					<Select
-						autoWidth
-						name="titleItem"
-						onChange={onSelectTitleItem}>
-						{Object.keys(userInfo.Items).map(el => {
-							return (
-								<MenuItem  value={el}>{el}</MenuItem >
-							)
-						})}
-					</Select>
-				</div>
-				<div>Вкус
-					<Select
-						autoWidth
-						labelId="tasteItem"
+				<select
+					id="title"
+					onChange={onSelectTitleItem}>
+					<option selected disabled>Жидкости</option>
+					{Object.keys(userInfo.Items).map(el => {
+						return (
+							<option value={el}>{el}</option>
+						)
+					})}
+				</select>
+				<div>
+
+					<select
 						onChange={onSelectTasteItem}>
+						<option selected disabled>Жидкости</option>
 						{userInfo.Items[titleItem]?.map((el: {}) => {
 							let keys = Object.keys(el)
 							return (
-								<MenuItem  value={keys}>{keys}</MenuItem >
+								<option value={keys}>{keys}</option>
 							)
 						})}
-					</Select>
+					</select>
+
 				</div>
+
 				<div>
 					Количество -
 					<input value={1} type="number" disabled/>
@@ -114,7 +169,8 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 					<input type="number" value={priceItem} onChange={onChangeItemPrice} min={12.5} max={30} step="0.5"/>
 				</div>
 				<Button
-					variant="outlined"
+					variant="contained"
+					color="secondary"
 					onClick={HandleSubmit}
 					disabled={tasteItem === "" || titleItem === ""}
 				>Подтвердить</Button>
