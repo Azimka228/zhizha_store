@@ -1,12 +1,25 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../../Firebase";
+import {updateProfile,updateEmail } from "firebase/auth";
+import EditableDiv from "../../ToolKits/EditableDiv";
 
 type ProfileProps = {
 	user: any
 }
 
+export type UserPropertyChangeType = {
+	displayName?: string | null | undefined;
+	photoURL?: string | null | undefined
+	email?: string | null | undefined
+}
+
 const Profile: React.FC<ProfileProps> = ({user}) => {
+
+	const [userInfo, setUserInfo] = useState(user)
+
+	console.log(user)
+
 	const [profile, setProfile] = useState({
 		Profit: 0,
 		Balance: 0,
@@ -26,26 +39,57 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 	}, [])
 	useEffect(() => {
 		test()
-	}, [test])
+	}, [])
+
+	const updateUserProperty = (User:UserPropertyChangeType) => {
+		if (User.email) {
+			updateEmail(user, User.email).then(() => {
+				let newUserInfo = {
+					...userInfo,
+					User
+				}
+				setUserInfo(newUserInfo)
+			}).catch((error) => {
+				throw new Error(error)
+			});
+		}else {
+			updateProfile(user, {
+				...User
+			}).then(() => {
+				let newUserInfo = {
+					...userInfo,
+					User
+				}
+				setUserInfo(newUserInfo)
+			}).catch((error) => {
+				throw new Error(error)
+			})
+		}
+	}
+
+
+
 
 	const onClickTakeProfit = () => {
 		const docRef = doc(db, "users", user.uid);
 		let currentData = new Date
+
 		function formatData(date: number | Date | undefined) {
-			return ['year', 'month', 'day'].map(e => new Intl.DateTimeFormat('en', {
-				[e]: 'numeric',
-			}).format(date).padStart(2, '0')).join(" ");
+			return ["year", "month", "day"].map(e => new Intl.DateTimeFormat("en", {
+				[e]: "numeric",
+			}).format(date).padStart(2, "0")).join(" ");
 		}
-		let formattedData:any = formatData(currentData)
+
+		let formattedData: any = formatData(currentData)
 
 		if (profile.History[formattedData] !== undefined) {
 			updateDoc(docRef, {
 				Profit: 0,
 				History: {
 					...profile.History,
-					[formattedData]:[
+					[formattedData]: [
 						...profile.History[formattedData],
-						`Профит - ${profile.Profit} ${currentData.toLocaleTimeString('en-US', { hour12: false })}`
+						`Профит - ${profile.Profit} ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
 					]
 				}
 			})
@@ -54,22 +98,20 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 				Profit: 0,
 				History: {
 					...profile.History,
-					[formattedData]:[
-						`Профит - ${profile.Profit} ${currentData.toLocaleTimeString('en-US', { hour12: false })}`
+					[formattedData]: [
+						`Профит - ${profile.Profit} ${currentData.toLocaleTimeString("en-US", {hour12: false})}`
 					]
 				}
 			})
 		}
 
-
-
-
 	}
 	return (
-		<div>
+		<div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
 			<h1>Профиль</h1>
 			<div>
-				Почта - {user.email}
+				<EditableDiv Name={{displayName: userInfo.displayName}} callbackSubmit={updateUserProperty}/>
+				<EditableDiv Name={{email: userInfo.email}} callbackSubmit={updateUserProperty}/>
 			</div>
 			<div>
 				Баланс: {profile.Balance} BYN

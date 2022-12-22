@@ -13,7 +13,7 @@ const MyHistory:React.FC<MyHistoryProps> = ({uid}) => {
 			let obj = doc.data()
 			// setBalance(obj?.Balance)
 			setHistory(obj?.History)
-		});
+		})
 	},[])
 	const [history,setHistory] = useState<any[]>([])
 	useEffect(()=>{

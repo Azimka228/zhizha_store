@@ -1,4 +1,8 @@
 import React, {ChangeEvent, useState} from "react";
+import {Button, IconButton, TextField} from "@mui/material";
+import BorderColorTwoToneIcon from '@mui/icons-material/BorderColorTwoTone';
+import DeleteIcon from "@mui/icons-material/Delete";
+import DoneOutlineTwoToneIcon from '@mui/icons-material/DoneOutlineTwoTone';
 
 type EdEditableItemType = {
 	title: string
@@ -41,18 +45,24 @@ const EditableItem:React.FC<EdEditableItemType> = ({title,startValue,onClickDele
 	}
 
 	return (
-		<div style={{display: "flex"}}>
+		<div style={{display: "flex", borderBottom:"2px solid grey"}}>
 			{editable ?
 				<>
-					<input name="text" onChange={onInputChange} value={inputValues.text}/>
-					<input name="count" type="number"  onChange={onInputChange} value={+inputValues.count}/>
-						<button onClick={onsubmitHanlder}> + </button>
+					<TextField name="text" onChange={onInputChange} value={inputValues.text}/>
+					<TextField name="count" type="number"  onChange={onInputChange} value={+inputValues.count}/>
+						<Button onClick={onsubmitHanlder}>
+						<DoneOutlineTwoToneIcon/>
+						</Button>
 				</>
 			 :
 				<>
 					<p>{Object.keys(startValue)[0]} -  {Object.values(startValue)[0]} штук</p>
-					<button onClick={onClickChangeStateEditable}>✍</button>
-					<button onClick={() => onClickDeleteBTNHandler(title,startValue)}>X</button>
+					<Button onClick={onClickChangeStateEditable}>
+						<BorderColorTwoToneIcon color="primary"/>
+					</Button>
+					<IconButton aria-label="delete"onClick={() => onClickDeleteBTNHandler(title,startValue)}>
+						<DeleteIcon/>
+					</IconButton>
 				</>
 			}
 		</div>

@@ -1,31 +1,31 @@
 import React, {useEffect, useState} from "react";
 import "./App.module.css";
 import "./Firebase";
-import MyBalance from "./Components/MyBalance/MyBalance";
+import MainPage from "./Components/MainPage/MainPage";
 import MyHistory from "./Components/MyHistory/MyHistory";
 import {Navigate, NavLink, Route, Routes, useNavigate} from "react-router-dom";
 import LoginForm from "./Components/User/LoginForm/LoginForm";
 import SignUpForm from "./Components/User/SignUpForm/SignUpForm";
 import {getAuth, onAuthStateChanged, signOut} from "firebase/auth";
 import MyItems from "./Components/MyItems/MyItems";
-import AddItems from "./Components/AddItems/AddItems";
 import {AppBar, Box, Drawer, IconButton, MenuItem, Paper, Toolbar} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
 import Profile from "./Components/User/Profile/Profile";
 import s from "./App.module.css"
+import {app} from "./Firebase";
 
 function App() {
 	let navigate = useNavigate();
 
 	const [user, setUser] = useState<any>()
-	const [error, setError] = useState()
-	console.log(user)
+
 	useEffect(() => {
-		// @ts-ignore
-		const unsubscribe = onAuthStateChanged(getAuth(), setUser, setError)
+		const unsubscribe = onAuthStateChanged(getAuth(app), setUser)
 		return () => unsubscribe()
-	}, )
+	},[])
+
+	console.log(getAuth(app).currentUser)
 
 	const LogOut = async () => {
 		await signOut(getAuth())
@@ -70,52 +70,45 @@ function App() {
 					</Typography>
 				</Toolbar>
 			</AppBar>
-
 			<Drawer
 				id="basic-menu"
 				open={open}
 				onClose={handleClose}
-
 			>
 				{user ?
 					<Box
-										sx={{
-											p: 4,
-											backgroundColor: "#8A2BE2",
-											height: "100%",
-											color: "white",
-											textDecoration: "none"
-										}}
+						sx={{
+							p: 4,
+							backgroundColor: "#8A2BE2",
+							height: "100%",
+							color: "white",
+							textDecoration: "none"
+						}}
 					>
 						<Paper sx={{borderRadius: 3, backgroundColor: "#7B68EE"}}>
 							<MenuItem onClick={handleClose}><NavLink
 								className={({isActive}) =>
-									(isActive ? s.active : '')
+									(isActive ? s.active : "")
 								}
-								to="/profile" >Профиль</NavLink ></MenuItem>
+								to="/profile">Профиль</NavLink></MenuItem>
 							<MenuItem onClick={handleClose}><NavLink
 								className={({isActive}) =>
-									(isActive ? '' + s.active : '')
+									(isActive ? "" + s.active : "")
 								}
-								to="/home">Главная</NavLink ></MenuItem>
+								to="/home">Главная</NavLink></MenuItem>
 							<MenuItem onClick={handleClose}><NavLink
 								className={({isActive}) =>
-									(isActive ? '' + s.active : '')
+									(isActive ? "" + s.active : "")
 								}
-								to="/history">История</NavLink ></MenuItem>
+								to="/history">История</NavLink></MenuItem>
 							<MenuItem onClick={handleClose}><NavLink
 								className={({isActive}) =>
-									(isActive ? '' + s.active : '')
+									(isActive ? "" + s.active : "")
 								}
-								to="/items">Жидкости</NavLink ></MenuItem>
-							<MenuItem onClick={handleClose}><NavLink
-								className={({isActive}) =>
-									(isActive ? '' + s.active : '')
-								}
-								to="/add-items">Добавить новую жидкость</NavLink ></MenuItem>
+								to="/items">Жидкости</NavLink></MenuItem>
 						</Paper>
-						<Paper sx={{borderRadius: 3, mt: 6, color: "#FF4500" , backgroundColor: "#7B68EE",}}>
-							<MenuItem  onClick={LogOut}>ВЫЙТИ</MenuItem>
+						<Paper sx={{borderRadius: 3, mt: 6, color: "#FF4500", backgroundColor: "#7B68EE",}}>
+							<MenuItem onClick={LogOut}>ВЫЙТИ</MenuItem>
 						</Paper>
 
 					</Box>
@@ -129,38 +122,32 @@ function App() {
 							textDecoration: "none"
 						}}
 					>
-						<Paper  sx={{borderRadius: 3, backgroundColor: "#7B68EE"}}>
-							<MenuItem onClick={handleClose}><NavLink  to="/home">Главная</NavLink ></MenuItem>
-							<MenuItem onClick={handleClose}><NavLink  to="/register">Регистрация</NavLink ></MenuItem>
-							<MenuItem onClick={handleClose}><NavLink  to="/login">Логин</NavLink ></MenuItem>
+						<Paper sx={{borderRadius: 3, backgroundColor: "#7B68EE"}}>
+							<MenuItem onClick={handleClose}><NavLink to="/home">Главная</NavLink></MenuItem>
+							<MenuItem onClick={handleClose}><NavLink to="/register">Регистрация</NavLink></MenuItem>
+							<MenuItem onClick={handleClose}><NavLink to="/login">Логин</NavLink></MenuItem>
 						</Paper>
-
 					</Box>
-
 				}
-
 			</Drawer>
-
-
 			{user ?
 				(<>
 					<Routes>
 						<Route
 							path="*"
-							element={<Navigate to="/home" replace />}
+							element={<Navigate to="/profile" replace/>}
 						/>
 						<Route path="/profile" element={<Profile user={user}/>}/>
-						<Route path="/home" element={<MyBalance uid={user.uid}/>}/>
+						<Route path="/home" element={<MainPage uid={user.uid}/>}/>
 						<Route path="/history" element={<MyHistory uid={user.uid}/>}/>
 						<Route path="/items" element={<MyItems uid={user.uid}/>}/>
-						<Route path="/add-items" element={<AddItems uid={user.uid}/>}/>
 					</Routes>
 				</>) :
 				(<>
 					<Routes>
 						<Route
 							path="*"
-							element={<Navigate to="/home" replace />}
+							element={<Navigate to="/home" replace/>}
 						/>
 						<Route path="/home" element={<div> HI! </div>}/>
 						<Route path="/login" element={<LoginForm/>}/>

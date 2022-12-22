@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
 import {
@@ -66,12 +66,12 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 
-	const test = useCallback(() => {
+	const test = () => {
 		onSnapshot(doc(db, "users", uid), (doc) => {
 			let obj = doc.data()
 			setItems(obj?.Items)
 		});
-	}, [setItems])
+	}
 
 	useEffect(() => {
 		test()
@@ -110,17 +110,28 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 
 	const onChangeText = (value: any, currValue: any) => {
 		const docRef = doc(db, "users", uid);
-		let obj = {
-			...items
+
+		let objEntries = Object.entries(items)
+		console.log("Obj entries", objEntries)
+
+		let currentIndex = objEntries.findIndex((el) => el[0] === value)
+		console.log(currentIndex)
+		objEntries[currentIndex][0] = currValue
+
+		const FinallyObj: any = {}
+
+		for (let i = 0; i < objEntries.length; i++) {
+			let key = objEntries[i][0]
+			let value = objEntries[i][1]
+			FinallyObj[key] = value
 		}
-		obj[currValue] = obj[value].map((el: any) => ({...el}))
-		delete obj[value]
-		console.log(obj)
+		console.log("RESULT", FinallyObj)
+
 		updateDoc(docRef, {
 			Items: {
-				...obj
+				...FinallyObj
 			},
-		})
+		}).finally(() => test())
 	}
 	const onChangeTasteItem = (index: any, currValue: any, title: any) => {
 		let Text = currValue["text"]
@@ -133,7 +144,6 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 		}
 		obj[title][index] = newCurrValue
 
-		console.log(obj)
 		updateDoc(docRef, {
 			Items: {
 				...obj,
@@ -150,7 +160,6 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 		let Count = taste["count"]
 		let Taste = taste["taste"]
 
-		console.log(obj[title].length)
 		if (obj[title].length === 0) {
 			updateDoc(docRef, {
 				Items: {
@@ -179,7 +188,6 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 		let obj = {
 			...items
 		}
-		console.log(obj)
 		updateDoc(docRef, {
 			Items: {
 				...obj,
@@ -191,8 +199,22 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 	}
 
 	return (
-		<div>
-			<Button variant="contained" color="success" onClick={handleOpen}>Новая жидкость</Button>
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "center",
+				alignItems: "center"
+			}}
+		>
+			<Button
+				style={{
+					marginTop:"15px"
+				}}
+				variant="contained"
+				color="success"
+				onClick={handleOpen}>Новая жидкость
+			</Button>
 			<BootstrapDialog
 				onClose={handleClose}
 				aria-labelledby="customized-dialog-title"
@@ -221,7 +243,7 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 				{
 					display: "flex",
 					justifyContent: "center",
-					flexWrap:"wrap"
+					flexWrap: "wrap"
 				}
 			}>
 				{items ? Object.keys(items)?.map(key => (

@@ -1,7 +1,7 @@
-import React, {ChangeEvent, useEffect, useState} from "react";
+import React, {ChangeEvent, ReactNode, useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../Firebase";
-import {Button} from "@mui/material";
+import {Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 
 type BalanceType = {
 	History: Array<string>
@@ -14,7 +14,7 @@ type MyBalanceProps = {
 	uid: string
 }
 
-const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
+const MainPage: React.FC<MyBalanceProps> = ({uid}) => {
 	const getBalanceUser = async () => {
 		onSnapshot(doc(db, "users", uid), (doc) => {
 			let obj = doc.data()
@@ -90,12 +90,13 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 				Items: {
 					...newObj
 				},
-			}).then(() => {
+			}).then((value) => {
+				console.log("Promise", value)
 				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
 				if (count === 1) {
 					setTasteItem("")
-					alert("All were selled")
-					window.location.reload()
+
+
 				}
 			})
 		} else {
@@ -115,52 +116,63 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 				let count = userInfo.Items[titleItem].find((el: { [x: string]: any; }) => el[tasteItem])[tasteItem]
 				if (count === 1) {
 					setTasteItem("")
-					alert("All were selled")
-					window.location.reload()
 				}
 			})
 		}
 		getBalanceUser()
 	}
-	const onSelectTasteItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const onSelectTasteItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
 		let value = event.target.value;
 		setTasteItem(value)
 	};
 	const onChangeItemPrice = (e: ChangeEvent<HTMLInputElement>) => {
 		setPriceItem(+e.currentTarget.value)
 	}
-	const onSelectTitleItem = (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const onSelectTitleItem = (event: SelectChangeEvent<string>, child: ReactNode) => {
 		let value = event.target.value;
 		setTitleItem(value)
 	};
 	return (
 		<>
-			<div>
-				<select
-					id="title"
-					onChange={onSelectTitleItem}>
-					<option selected disabled>Жидкости</option>
-					{Object.keys(userInfo.Items).map(el => {
-						return (
-							<option value={el}>{el}</option>
-						)
-					})}
-				</select>
-				<div>
-
-					<select
-						onChange={onSelectTasteItem}>
-						<option selected disabled>Жидкости</option>
-						{userInfo.Items[titleItem]?.map((el: {}) => {
-							let keys = Object.keys(el)
-							return (
-								<option value={keys}>{keys}</option>
-							)
-						})}
-					</select>
-
+			<div style={{
+				display:"flex",
+				flexDirection:"column",
+				justifyContent:"center",
+				alignItems:"center"
+			}}>
+				<div style={{marginTop:"20px",marginBottom:"20px"}}>
+					<FormControl variant="filled"  sx={{ m: 1, minWidth: 160 }}>
+						<InputLabel id="title">Производитель</InputLabel>
+						<Select
+							id="title"
+							label="title"
+							onChange={onSelectTitleItem}>
+							<option selected disabled>Жидкости</option>
+							{Object.keys(userInfo.Items).map(el => {
+								return (
+									<MenuItem value={el}>{el}</MenuItem>
+								)
+							})}
+						</Select>
+					</FormControl>
 				</div>
-
+				<div style={{marginBottom:"20px"}}>
+					<FormControl variant="filled"  sx={{ m: 1, minWidth: 160 }}>
+						<InputLabel id="taste">Вкус</InputLabel>
+						<Select
+							id="taste"
+							label="taste"
+							onChange={onSelectTasteItem}>
+							<option selected disabled>Жидкости</option>
+							{userInfo.Items[titleItem] && userInfo.Items[titleItem].map((el: any) => {
+								let keys = Object.keys(el)[0]
+								return (
+									<MenuItem value={keys}>{keys}</MenuItem>
+								)
+							})}
+						</Select>
+					</FormControl>
+				</div>
 				<div>
 					Количество -
 					<input value={1} type="number" disabled/>
@@ -179,4 +191,4 @@ const MyBalance: React.FC<MyBalanceProps> = ({uid}) => {
 	);
 };
 
-export default MyBalance;
+export default MainPage;
