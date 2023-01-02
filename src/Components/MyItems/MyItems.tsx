@@ -204,7 +204,8 @@ const MyItems: React.FC<MyItemsProps> = ({uid}) => {
 				display: "flex",
 				flexDirection: "column",
 				justifyContent: "center",
-				alignItems: "center"
+				alignItems: "center",
+				paddingBottom: "30px",
 			}}
 		>
 			<Button

@@ -32,7 +32,10 @@ const SignUpForm = () => {
 			.then((userCredential) => {
 				setDoc(doc(db, "users", userCredential.user.uid), {
 					History: [],
-					Balance: 0,
+					Balance: {
+						labelCard: 0,
+						labelCash: 0
+					},
 					Profit:0,
 					Items: {
 						"rell": [

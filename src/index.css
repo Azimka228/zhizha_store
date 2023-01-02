@@ -14,3 +14,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+html {
+  /* Растягиваем документ на всю высоту окна */
+  height: 100%;
+}
+
+body {
+  position: relative;
+  /* Растягиваем body по высоте html */
+  min-height: 100%;
+}
+
+main {
+  /* Выставляем отступ с высотой footer */
+  padding-bottom: 30px;
+}
+
+footer {
+  /* Позиционируем footer внизу main */
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Высота footer */
+  height: 30px;
+  background-color: greenyellow;
+}

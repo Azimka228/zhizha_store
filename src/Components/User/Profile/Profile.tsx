@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {doc, onSnapshot, updateDoc} from "firebase/firestore";
 import {db} from "../../../Firebase";
-import {updateProfile,updateEmail } from "firebase/auth";
+import {updateProfile, updateEmail} from "firebase/auth";
 import EditableDiv from "../../ToolKits/EditableDiv";
 
 type ProfileProps = {
@@ -18,14 +18,17 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 
 	const [userInfo, setUserInfo] = useState(user)
 
-	console.log(user)
+
 
 	const [profile, setProfile] = useState({
 		Profit: 0,
-		Balance: 0,
+		Balance: {
+			labelCard: 0,
+			labelCash: 0
+		},
 		History: []
 	})
-
+	console.log(profile)
 	let test = useCallback(() => {
 		onSnapshot(doc(db, "users", user.uid), (doc) => {
 			let obj = doc.data()
@@ -41,7 +44,7 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 		test()
 	}, [])
 
-	const updateUserProperty = (User:UserPropertyChangeType) => {
+	const updateUserProperty = (User: UserPropertyChangeType) => {
 		if (User.email) {
 			updateEmail(user, User.email).then(() => {
 				let newUserInfo = {
@@ -52,7 +55,7 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 			}).catch((error) => {
 				throw new Error(error)
 			});
-		}else {
+		} else {
 			updateProfile(user, {
 				...User
 			}).then(() => {
@@ -66,9 +69,6 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 			})
 		}
 	}
-
-
-
 
 	const onClickTakeProfit = () => {
 		const docRef = doc(db, "users", user.uid);
@@ -106,21 +106,32 @@ const Profile: React.FC<ProfileProps> = ({user}) => {
 		}
 
 	}
+
+	const AllBalance = Object.values(profile.Balance).reduce((acc, cur) => acc + cur, 0)
+
 	return (
-		<div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
+		<div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
 			<h1>Профиль</h1>
 			<div>
+				<div>Имя:</div>
 				<EditableDiv Name={{displayName: userInfo.displayName}} callbackSubmit={updateUserProperty}/>
+				<div>Почта:</div>
 				<EditableDiv Name={{email: userInfo.email}} callbackSubmit={updateUserProperty}/>
 			</div>
 			<div>
-				Баланс: {profile.Balance} BYN
+				<button>Забрать профит</button>
+				<button>Снять весь кэш</button>
+			</div>
+			<div>
+				<p>Общий баланс: {AllBalance} BYN</p>
+				<p>Баланс на карте: {profile.Balance.labelCard} BYN</p>
+				<p>Баланс наличкой: {profile.Balance.labelCash} BYN</p>
 			</div>
 			<div>
 				Профит: {profile.Profit} BYN
 				<button
 					disabled={profile.Profit === 0}
-					onClick={onClickTakeProfit}>Забрать профит</button>
+					onClick={onClickTakeProfit}>Забрать бабло</button>
 			</div>
 		</div>
 	);
